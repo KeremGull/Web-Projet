@@ -1,8 +1,7 @@
-
+import "./login.css"
 export default function Login({form,setForm,handleFunc}) {
     return (
-        <div>
-            <h1>Login</h1>
+        <div class="login">
             <form>
                 <label for="username">E-mail:</label>
                 <input type="email" id="email" name="email" value={form.email} onChange={e => {

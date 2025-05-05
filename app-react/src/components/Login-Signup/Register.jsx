@@ -1,10 +1,12 @@
 import React from 'react'
-
+import "./Register.css"
 function Register({form,setForm,handleFunc}) {
     
   return(
-    <div>
-    <label htmlFor="nom">Nom:</label>
+    
+    <div class = "register">
+    <form method="POST" action="/login_register">
+    <label htmlFor="nom" >Nom:</label>
     <input type="text" id="nom" name="nom" required value={form.nom} onChange={e => {
         setForm({...form,nom:e.target.value})
     }}/>
@@ -35,6 +37,7 @@ function Register({form,setForm,handleFunc}) {
     }}/>
   
   <button type="submit" onClick={handleFunc}>Register</button>
+  </form>
     </div>
   )
     
