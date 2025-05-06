@@ -5,7 +5,7 @@ const AuthContext = createContext()
 function AuthProvider({children}){
     const navigate = useNavigate()
     const [user,setUser]=useState(JSON.parse(localStorage.getItem("user")) || null)
-    const [token,setToken]=useState(localStorage.getItem("token") || "")
+    const [token,setToken]=useState(localStorage.getItem("token") || null)
 
     const login = (data) => {
         localStorage.setItem("token",data.token)

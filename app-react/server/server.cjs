@@ -21,17 +21,22 @@ async function connectDB() {
 }
 connectDB();
 const server = http.createServer(async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Content-Type', 'application/json');
-
-
-    if (req.method === 'OPTIONS') {
-      res.writeHead(204);
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+    
+    if (req.method === "OPTIONS") {
+      res.writeHead(200, {
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          'Access-Control-Allow-Origin': 'http://localhost:5173',
+      });
       res.end();
       return;
-    }
+  }
+
+
 
     if (req.method === "POST" && req.url === "/login_register"){
       let body = "";
@@ -84,6 +89,41 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ message: 'Sunucu hatası' }));
           }
+        }
+      });
+    }
+    console.log(req.method,req.url)
+    if (req.method === "POST" && req.url === "/check_token"){
+
+
+      console.log(req.headers["authorization"])
+      let body = "";
+      req.on("data", chunk => {
+        
+      });
+      
+      
+      req.on('end', async () => {
+        
+        try{
+          const token = req.headers["authorization"].split(" ")[1];
+          jwt.verify(token, SECRET_KEY, (err, decoded) => {
+            if (err) {
+              res.writeHead(401);
+              res.end(JSON.stringify({ message: 'Token geçersiz', }));
+              return;
+            }else{
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ message: 'Token geçerli',decoded:decoded }));
+              return;
+            }
+          }
+          );
+        }
+        catch (error) {
+          console.log(error)
+          res.writeHead(401);
+          res.end(JSON.stringify({ message: 'Sunucu hatası' }));
         }
       });
     }
