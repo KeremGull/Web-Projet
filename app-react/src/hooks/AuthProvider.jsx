@@ -1,28 +1,36 @@
-import {useContext,createContext, useState, useEffect} from 'react'
-import { useNavigate } from 'react-router'
-const AuthContext = createContext()
+import { useContext, createContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
+import Cookies from 'js-cookie';
 
-function AuthProvider({children}){
-    const navigate = useNavigate()
-    const [user,setUser]=useState(JSON.parse(localStorage.getItem("user")) || null)
-    const [token,setToken]=useState(localStorage.getItem("token") || null)
+const AuthContext = createContext();
+
+function AuthProvider({ children }) {
+    const navigate = useNavigate();
+    const [token, setToken] = useState(Cookies.get('token') || null);
+    const [user, setUser] = useState(Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null);
 
     const login = (data) => {
-        localStorage.setItem("token",data.token)
-        localStorage.setItem("user",JSON.stringify(data.user))
-        setToken(data.token)
-        setUser(data.user)    
-        navigate("/")
-    }
-    const logout = () =>{
-        localStorage.removeItem("token")
-        localStorage.removeItem("user")
-        setToken(null)
-        setUser(null)
-        navigate("/login_register")
-        
-    }   
-    return <AuthContext.Provider value={{token,user,login,logout}}> {children} </AuthContext.Provider>
+        Cookies.set('token', data.token, { expires: 1 }); // Token expires in 1 days
+        Cookies.set('user', JSON.stringify(data.user), { expires: 1 });
+        setToken(data.token);
+        setUser(data.user);
+        navigate('/');
+    };
+
+    const logout = () => {
+        Cookies.remove('token');
+        Cookies.remove('user');
+        setToken(null);
+        setUser(null);
+        navigate('/login_register');
+    };
+
+    return (
+        <AuthContext.Provider value={{ token, user, login, logout }}>
+            {children}
+        </AuthContext.Provider>
+    );
 }
-export const useAuth = () => useContext(AuthContext)
-export default AuthProvider
+
+export const useAuth = () => useContext(AuthContext);
+export default AuthProvider;

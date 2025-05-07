@@ -8,7 +8,6 @@ import "./Login_Register.css"
 export default function Login_Register() {
     const navigate = useNavigate()
     const user = useAuth()
-
     const [shown,setShown]=useState("login");
     const [registerForm,setRegisterForm]=useState({
         nom:"",
@@ -30,12 +29,13 @@ export default function Login_Register() {
             const response = await fetch('http://localhost:5001/login_register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ method:"register", name: registerForm.nom+","+ registerForm.prenom, email: registerForm.email, password: registerForm.password, birthdate: registerForm.date_naissance }),
+                body: JSON.stringify({ method:"register", name: registerForm.nom+","+ registerForm.prenom, email: registerForm.email, password: registerForm.password,role:"user" ,birthdate: registerForm.date_naissance }),
               });
             console.log("response",response)
             if (response.status === 200){
                 const data = await response.json()
-                console.log("data",data)
+                user.login(data)
+                
             }
             else if (response.status === 409){
                 alert("Bu e-posta zaten kayıtlı.")
@@ -55,7 +55,6 @@ export default function Login_Register() {
               });
             if (response.status === 200){
                 const data = await response.json()
-                console.log("data",data)
                 user.login(data)
             }else if (response.status === 401){
                 alert("Geçersiz e-posta veya şifre.")
@@ -65,11 +64,24 @@ export default function Login_Register() {
             }
         }
     }
-    useEffect(()=>{
+    
+    useEffect(() => {
         if (user.token){
-            navigate("/")
+            const response = fetch('http://localhost:5001/check_token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json'
+                , "Authorization": `Bearer ${user.token}` }},
+                ).then(res => {
+                    console.log("res",res)
+                    if (res.status === 200){
+                        navigate("/")
+                    }
+                    else{
+                        user.logout()
+                    }
+                })
         }
-    },[user.token])
+    })
 
     return (
         

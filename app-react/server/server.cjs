@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion,ObjectId } = require('mongodb');
 const http = require('http');
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = "kerem-melisa-mert"
@@ -50,7 +50,7 @@ const server = http.createServer(async (req, res) => {
         // Register
         if (body.method == "register"){
           try{
-            user =  {name:body.name, email:body.email, password:body.password, birthdate:body.birthdate}
+            user =  {name:body.name, email:body.email, password:body.password,role:body.role ,birthdate:body.birthdate}
             Users= db.collection('Users')
             const result = await Users.insertOne(user);
     
@@ -76,9 +76,11 @@ const server = http.createServer(async (req, res) => {
             Users= db.collection('Users')
             const result = await Users.findOne(user);
             if (result) {
-              const token = jwt.sign({ email: result.email }, SECRET_KEY, { expiresIn: '5h' });
+              const token = jwt.sign({email: result.email}, SECRET_KEY, { expiresIn: '5h' });
+
               res.writeHead(200, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({user: result,token:token}));
+              user = {name:result.name, email:result.email,id :result._id.toString()}
+              res.end(JSON.stringify({user: user,token:token}));
             } else {
               res.writeHead(401);
               res.end(JSON.stringify({ message: 'Geçersiz e-posta veya şifre.' }));
@@ -127,6 +129,43 @@ const server = http.createServer(async (req, res) => {
         }
       });
     }
+
+    if (req.method === "POST" && req.url === "/profile") {
+      let body = "";
+      req.on("data", chunk => {
+          body += chunk.toString();
+      });
+  
+      req.on("end", async () => {
+          try {
+              body = JSON.parse(body);
+              const profileId = body.id;
+              const token = req.headers["authorization"].split(" ")[1];
+              const decoded = jwt.verify(token, SECRET_KEY);
+              const Users = db.collection("Users");
+              var profile = await Users.findOne({ _id:new ObjectId(profileId)});
+              if (profile) {
+                  const isSelf = decoded.email === profile.email; // Sorgulayan kişi aynı mı kontrolü
+                  profile = {
+                      name: profile.name,
+                      birthdate: profile.birthdate,
+                      role: profile.role,
+                      id: profile.id,
+                  }
+                  res.writeHead(200, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({ profile, isSelf }));
+              } else {
+                  res.writeHead(404);
+                  res.end(JSON.stringify({ message: "Profil bulunamadı." }));
+              }
+          } catch (error) {
+              console.error("Hata:", error);
+              res.writeHead(500);
+              res.end(JSON.stringify({ message: "Sunucu hatası." }));
+          }
+      });
+  }
+
 });
   
 

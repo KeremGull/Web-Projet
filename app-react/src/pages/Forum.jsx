@@ -2,8 +2,11 @@ import { useState,useEffect} from 'react'
 import Messages from '../components/home/Messages'
 import NavBar from '../components/NavBar'
 import { useAuth } from '../hooks/AuthProvider'
+
+
 function Forum(){
     const [closed,setClosed]=useState(false)
+    
     return (
         <>
         <NavBar/>
@@ -11,7 +14,7 @@ function Forum(){
         <div>
 
             <h1>Forum</h1>
-                {useAuth().user.role == "admin" ? 
+                {"admin" == "admin" ? 
                     <div>
                     <label>Private Forum</label>
                     <input type="checkbox" checked={closed} onChange={()=>setClosed(!closed)}/>
