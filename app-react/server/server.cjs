@@ -1,6 +1,7 @@
 const { MongoClient, ServerApiVersion,ObjectId } = require('mongodb');
 const http = require('http');
 const jwt = require('jsonwebtoken');
+const { format } = require('path');
 const SECRET_KEY = "kerem-melisa-mert"
 const uri = "mongodb+srv://kerem:krm12321232@projet-web.fmxquu3.mongodb.net/?retryWrites=true&w=majority&appName=projet-web";
 const PORT = 5001;
@@ -50,12 +51,17 @@ const server = http.createServer(async (req, res) => {
         // Register
         if (body.method == "register"){
           try{
-            user =  {name:body.name, email:body.email, password:body.password,role:body.role ,birthdate:body.birthdate}
+            const date = new Date();
+            const formattedDate = date.toISOString().split('T')[0];
+            user =  {name:body.name, email:body.email, password:body.password,
+              role:body.role ,birthdate:body.birthdate,joinedAt:formattedDate}
             Users= db.collection('Users')
             const result = await Users.insertOne(user);
-    
+            
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(result));
+            user = {name:user.name, email:user.email,id :user._id.toString()}
+            const token = jwt.sign({email: user.email}, SECRET_KEY, { expiresIn: '5h' });
+            res.end(JSON.stringify({user:user,token:token}));
           }
           catch (error) {
             console.log(error)
@@ -144,6 +150,7 @@ const server = http.createServer(async (req, res) => {
               const decoded = jwt.verify(token, SECRET_KEY);
               const Users = db.collection("Users");
               var profile = await Users.findOne({ _id:new ObjectId(profileId)});
+              console.log(profile)
               if (profile) {
                   const isSelf = decoded.email === profile.email; // Sorgulayan kişi aynı mı kontrolü
                   profile = {
@@ -151,7 +158,9 @@ const server = http.createServer(async (req, res) => {
                       birthdate: profile.birthdate,
                       role: profile.role,
                       id: profile.id,
+                      joinedAt: profile.joinedAt,
                   }
+                  console.log("profile",profile)
                   res.writeHead(200, { "Content-Type": "application/json" });
                   res.end(JSON.stringify({ profile, isSelf }));
               } else {

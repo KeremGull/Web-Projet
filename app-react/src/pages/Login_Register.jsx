@@ -29,7 +29,9 @@ export default function Login_Register() {
             const response = await fetch('http://localhost:5001/login_register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ method:"register", name: registerForm.nom+","+ registerForm.prenom, email: registerForm.email, password: registerForm.password,role:"user" ,birthdate: registerForm.date_naissance }),
+                body: JSON.stringify({ method:"register", name: registerForm.nom+","
+                    + registerForm.prenom, email: registerForm.email,
+                    password: registerForm.password,role:"user" ,birthdate: registerForm.date_naissance }),
               });
             console.log("response",response)
             if (response.status === 200){

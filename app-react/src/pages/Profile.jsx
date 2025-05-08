@@ -11,7 +11,6 @@ import ProfileSettings from "../components/profile/ProfileSettings";
 export default function Profile() {
     const { id } = useParams();
     const token = useAuth().token;
-
     useEffect(()=>{
          //Id database de mi diye bakan bir useEffect yazılacak
         async function fetchProfile() {
@@ -29,6 +28,7 @@ export default function Profile() {
                     const data = await response.json();
                     setProfileData(data.profile); 
                     setIsSelf(data.isSelf); 
+                    
                 } else {
                     console.error("Profil bilgisi alınamadı:", response.status);
                 }
@@ -37,6 +37,7 @@ export default function Profile() {
             }
         }
         fetchProfile();
+
     }, [id, token]);
     const [isSelf, setIsSelf] = useState(false);
     const [content, setContent] = useState("profile");
@@ -45,14 +46,14 @@ export default function Profile() {
     function returnContent(content){
         switch(content){
             case "profile":
-                return <ProfileInfo isSelf={isSelf} profile={profileData}/>
+                return <ProfileInfo isSelf={isSelf} profile={profileData} isReady={profileData != null}/>
                 break
             case "messages":
-                return <ProfileMessages isSelf={isSelf} profile={profileData}/>
+                return <ProfileMessages isSelf={isSelf} profile={profileData} isReady={profileData != null}/>
                 break
             case "friends":
                 if (isSelf){
-                    return <ProfileFriends profile={profileData}/>
+                    return <ProfileFriends profile={profileData} isReady={profileData != null} />
                 }
                 else{
                     return <h1>You are not authorized</h1>
@@ -60,7 +61,7 @@ export default function Profile() {
                 break
             case "settings":
                 if (isSelf){
-                    return <ProfileSettings profile={profileData}/>
+                    return <ProfileSettings profile={profileData} isReady={profileData != null}/>
                 }
                 else{
                     return <h1>You are not authorized</h1>

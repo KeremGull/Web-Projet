@@ -1,12 +1,18 @@
 import { useEffect } from "react"
 import {useAuth} from "../../hooks/AuthProvider"
-export default function ProfileInfo({isSelf, id}) {
-    const user = null //User bilgilerini çeken bir fonksiyon yazılacak. İsim Soyisim, üyelik tarihi, rolü, doğum tarihi
-    // Kaç topic, kaç reply i olduğu 
+export default function ProfileInfo({isSelf, profile,isReady}) {
+    if (!isReady) {
+        return (
+            <div>
+                <h1>Loading...</h1>
+            </div>
+        )
+    }
     return (
         <div>
-            <h1>{id}</h1>
-            {isSelf ? <h3>Kendi Profiline bakıyorsun</h3> : null}
+            <h1>{`${profile.name.split(",")[1]} ${profile.name.split(",")[0]}`}</h1>
+            <h4>{profile.role}</h4>
+            <h5>{profile.joinedAt}</h5>
         </div>
     )
 
